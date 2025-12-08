@@ -1,0 +1,660 @@
+
+
+EXERCISE 1.1
+===========================================================================================================================
+Q. Install and remove packages
+Q. Identify recent patch updates
+Q. Roll back or downgrade packages after patching
+
+
+yum install tree -y                             # Install a small package (tree)
+tree --version                                  # Verify installation
+yum list installed | grep tree                  # Confirm installed package
+
+yum remove tree -y                              # Remove the tree package
+which tree                                      # Verify it is removed (should return nothing)
+
+
+rpm -qa --last | head -20                       # List recently updated packages
+#openssl-libs-3.0.7-24.el9.x86_64   Fri 18 Oct 2025 10:35:12 PM EDT
+#glibc-2.34-100.el9.x86_64           Fri 18 Oct 2025 10:35:10 PM EDT
+#kernel-5.14.0-450.el9.x86_64        Fri 18 Oct 2025 10:34:55 PM EDT
+
+
+yum history                                    # List patch/update operations
+
+ID     | Command line        | Date and time        | Action(s)   | Altered
+---------------------------------------------------------------------------
+ 50 | upgrade               | 2025-10-18 22:34     | Upgrade     |  35
+ 49 | install tree          | 2025-10-17 20:10     | Install     |   1
+
+
+yum history info 50                             # View what was changed in that patch
+
+Upgraded:
+  openssl-libs-3.0.7-22.el9.x86_64 -> 3.0.7-24.el9.x86_64
+  glibc-2.34-98.el9.x86_64 -> 2.34-100.el9.x86_64
+  kernel-5.14.0-440.el9.x86_64 -> 5.14.0-450.el9.x86_64
+
+
+yum history undo 50                             # Roll back all packages updated in transaction 50
+
+yum downgrade glibc openssl-libs                # Revert specific packages to earlier versions
+
+yum install glibc-2.34-98.el9.x86_64            # Reinstall specific version
+
+systemctl restart myapp.service                 # Restart the failed service
+journalctl -xe | tail -20                       # Check logs for confirmation
+
+
+cat /var/log/dnf.log | tail -20                 # Check the DNF log for update actions
+dnf history list                                # Confirm rollback status
+
+
+
+Kernel Rollback (If Patch Includes Kernel Update)
+
+# During reboot: Select "Advanced Options" → Choose old kernel
+# After boot, make the old kernel default
+grubby --set-default /boot/vmlinuz-5.14.0-440.el9.x86_64
+
+================================================================================================================================================
+
+EXERCISE 1.2
+																
+sudo yum install wget -y						# Download a small RPM package
+wget http://mirror.centos.org/centos/7/os/x86_64/Packages/tree-1.6.0-10.el7.x86_64.rpm
+
+sudo rpm -ivh tree-1.6.0-10.el7.x86_64.rpm		# Install it manually
+
+tree /etc | head								# Verify it works
+
+sudo rpm -e tree								# Remove it
+
+rpm -q name_of_the_package.rpm					# check installed package 
+
+rpm -ql 										# list all installed package (its L)
+
+rpm -ql --last | less 							# list all recent installed packages
+
+rpm -qa											# this will show you all already installed packages in system
+
+rpm -Uvh tree-1.6.0-10.el7.x86_64.rpm		    # Already installed package will get UPGRADE by this commond
+
+rpm -e name_of_the_package.rpm					# removing the package
+
+rpm -ev --nodeps name_of_the_package.rpm		# forcely removing the package (if not able to remove)
+
+rpm -qf path_of_directory 						# to know which directory create/installed from which package
+
+rpm -qi mane_of_package							# to konw/view complete more detail of package 
+rpm -qip mane_of_package	
+
+rpm -qdf mane_of_package						# to know the package documentaion before install ( each package will have document file)
+
+rpm -Va 										# to verify all installed rpm packages
+	
+
+================================================================================================================================================
+
+EXERCISE 1.3
+===========================================================================================================================
+
+# ======================================================================
+# PROJECT: ADVANCED RPM MANAGEMENT / PATCHING / ROLLBACK LAB (YUM)
+# ======================================================================
+
+mkdir rpm_project                                        # Create project folder
+cd rpm_project                                           # Enter project dir
+
+
+# ======================================================================
+# SECTION 1 — INSTALL & REMOVE PACKAGES
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 1 — Install Packages (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum install -y tree                                 # Basic install
+sudo yum install -y htop wget                            # Install multiple packages
+
+sudo yum install --downloadonly --downloaddir=./pkgs tree   # ADV: Download only
+sudo yum deplist tree                                    # ADV: Show dependencies
+sudo yum provides tree                                   # ADV: What package provides 'tree'
+
+yum repolist all                                         # ADV: Show all repos
+yum repoinfo                                             # ADV: Advanced repo details
+
+yum search --verbose tree                                # ADV: Detailed search
+
+
+# ----------------------------------------------------------------------
+# STEP 2 — Install From RPM File (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum install -y yum-utils                            # Tools for yum
+yumdownloader --destdir=. tree                           # Download binary RPM
+
+sudo rpm -ivh tree*.rpm                                  # Basic install from RPM
+grep -i "rpm" /var/log/messages							 # Check rpm manually installed logs
+
+sudo rpm -ivh --nodeps tree*.rpm                         # ADV: Ignore dependencies
+sudo rpm -ivh --nosignature tree*.rpm                    # ADV: Skip GPG signature checks
+
+rpm -qp tree*.rpm 	                                     # ADV: Query package info before install
+rpm -qpR tree*.rpm  	                                     # ADV: List required dependencies
+
+
+# ----------------------------------------------------------------------
+# STEP 3 — Verify Installation
+# ----------------------------------------------------------------------
+
+rpm -q tree                                              # Basic query
+rpm -qi tree                                             # Show metadata
+rpm -ql tree                                             # List installed files
+
+rpm -qa | grep tree                                      # ADV: Grep installed list
+rpm -qa --last | head                                    # ADV: Show recently installed packages
+rpm -qa --queryformat '%{NAME} %{VERSION}\n' | sort      # ADV: Custom output formatting
+
+
+# ----------------------------------------------------------------------
+# STEP 4 — Remove Packages (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum remove -y tree                                  # Basic remove
+sudo rpm -ev tree                                        # rpm removal
+
+sudo rpm -ev --nodeps tree                               # ADV: Force remove (dangerous)
+sudo yum autoremove -y                                   # ADV: Remove unused dependencies
+
+sudo yum history userundo <ID>                           # ADV: Undo specific user’s install action
+
+
+# ----------------------------------------------------------------------
+# STEP 5 — Identify Package Owner
+# ----------------------------------------------------------------------
+
+rpm -qf /usr/bin/wget                                    # Basic owner check
+rpm -qf /etc/nanorc                                      # File → package mapping
+
+rpm -Va                                                  # ADV: Verify ALL installed packages
+rpm -Va | grep '^..5'                                    # ADV: Find modified config files
+
+
+# ======================================================================
+# SECTION 2 — PATCHING / UPDATES / HISTORY
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 6 — Apply System Patches (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum update -y                                       # Update system
+
+sudo yum update-minimal -y                               # ADV: Security-only updates
+sudo yum update --security                               # ADV: CVE-relevant updates only
+
+yum check-update                                         # ADV: Check without applying
+yum list updates                                         # ADV: See what updates available
+
+yum update bash --advisory=RHSA-XXXX:YYY                 # ADV: Patch specific security advisory
+
+
+# ----------------------------------------------------------------------
+# STEP 7 — Identify Recent Patches
+# ----------------------------------------------------------------------
+
+sudo yum history                                         # Basic history
+sudo yum history info <ID>                               # Detailed patch info
+
+sudo yum history list                                     # ADV: All patch sessions
+sudo awk '{print $1}' /var/log/yum.log | sort | uniq     # ADV: Custom log parsing
+
+grep -i updated /var/log/yum.log                         # ADV: Find updated packages
+
+
+# ----------------------------------------------------------------------
+# STEP 8 — List Recently Installed Packages
+# ----------------------------------------------------------------------
+
+rpm -qa --last | head                                    # Basic recent pkgs
+rpm -qa --last | less                                    # ADV: Searchable view
+
+rpm -qa --qf '%{INSTALLTIME:date} %{NAME}\n' | sort      # ADV: Time-based sorting
+
+
+# ======================================================================
+# SECTION 3 — ROLLBACK / DOWNGRADE / VERSION HISTORY
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 9 — Rollback Patches (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum history rollback <ID>                           # Basic rollback
+
+sudo yum history undo <ID>                               # ADV: Undo specific action
+sudo yum history redo <ID>                               # ADV: Reapply removed update
+
+sudo yum downgrade -y bash                               # ADV: Downgrade package
+
+
+# ----------------------------------------------------------------------
+# STEP 10 — Downgrade Specific Packages (Advanced)
+# ----------------------------------------------------------------------
+
+sudo yum list --showduplicates bash                      # All versions
+sudo yum install bash-<version>                          # Install specific version
+
+yumdownloader --destdir=./old bash-<version>             # ADV: Download old RPM
+sudo rpm -Uvh --oldpackage bash-<version>.rpm            # ADV: Force install old version
+
+
+# ======================================================================
+# SECTION 4 — SECURITY / SIGNATURES / INTEGRITY
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 11 — Verify Package Integrity (Basic + Advanced)
+# ----------------------------------------------------------------------
+
+rpm -V bash                                              # Verify integrity
+rpm -V openssl                                           # Check critical package
+
+rpm -Va                                                  # ADV: Validate all installed packages
+rpm -Va --nofiles                                        # ADV: Validate metadata only
+rpm -Va --noconfig                                       # ADV: Skip config files
+
+
+# ----------------------------------------------------------------------
+# STEP 12 — Verify Digital Signatures
+# ----------------------------------------------------------------------
+
+rpm --checksig tree*.rpm                                # Basic check
+
+rpm --checksig --verbose tree*.rpm                      # ADV: Show key, signer, hash
+gpg --list-keys                                          # ADV: List imported GPG keys
+gpg --fingerprint                                        # ADV: Security auditing
+
+
+# ----------------------------------------------------------------------
+# STEP 13 — Repair Broken Packages
+# ----------------------------------------------------------------------
+
+sudo yum reinstall -y tree                               # Reinstall package
+
+sudo yum clean all                                       # ADV: Clean cache
+sudo yum makecache                                       # ADV: Rebuild metadata cache
+
+sudo rpm --rebuilddb                                     # ADV: Repair corrupted RPM database
+file /var/lib/rpm/*                                      # ADV: Check DB structure
+
+
+# ======================================================================
+# SECTION 5 — DOWNLOAD, SOURCE, AND DEBUG PACKAGES
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 14 — Download Packages (Advanced)
+# ----------------------------------------------------------------------
+
+yumdownloader tree                                       # Download RPM
+yumdownloader --source tree                              # Download SRPM
+yumdownloader --resolve htop                             # Download package + dependencies
+
+
+# ----------------------------------------------------------------------
+# STEP 15 — Explore Dependency Trees (Advanced)
+# ----------------------------------------------------------------------
+
+repoquery --requires tree                               # Dependencies
+repoquery --whatrequires tree                            # Reverse dependencies
+
+repoquery --tree-requires tree                           # Full dependency tree
+repoquery --tree-whatrequires tree                       # Packages that rely on tree
+
+
+# ======================================================================
+# COMPLETE ENTERPRISE PATCHING PROJECT
+# ======================================================================
+
+
+# ----------------------------------------------------------------------
+# STEP 16 — Pre-Patch State Capture
+# ----------------------------------------------------------------------
+
+rpm -qa --last > before_patch.txt                        # Save package state
+rpm -Va > integrity_before.txt                           # Save integrity report
+
+
+# ----------------------------------------------------------------------
+# STEP 17 — Apply All Patches
+# ----------------------------------------------------------------------
+
+sudo yum update -y                                       # Apply patches
+sudo yum update --security                               # Apply only security updates
+
+
+# ----------------------------------------------------------------------
+# STEP 18 — Patch Verification
+# ----------------------------------------------------------------------
+
+rpm -Va > integrity_after.txt                            # Compare before/after
+diff -s integrity_before.txt integrity_after.txt            # Identify changed files
+
+
+# ----------------------------------------------------------------------
+# STEP 19 — Rollback & Downgrade
+# ----------------------------------------------------------------------
+
+sudo yum history rollback <ID>                           # Rollback system
+sudo yum downgrade -y openssl bash                       # Downgrade critical packages
+
+
+# ----------------------------------------------------------------------
+# STEP 20 — Cleanup
+# ----------------------------------------------------------------------
+
+sudo yum autoremove -y                                   # Remove unused deps
+sudo yum clean all                                       # Cleanup repo cache
+
+cd ..
+rm -rf rpm_project
+
+
+================================================================================================================================================
+
+
+EXERCISE 1.5
+===========================================================================================================================
+
+
+# ============================================================================
+# PROJECT: UPDATE vs UPGRADE — ENTERPRISE PATCHING PRACTICAL LAB (YUM)
+# ============================================================================
+
+mkdir update_vs_upgrade_lab
+cd update_vs_upgrade_lab
+
+# ============================================================================
+# PART 1 — BASELINE SYSTEM CHECK
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 1 — Capture current package versions (baseline)
+# ---------------------------------------------------------------------------
+
+rpm -qa --last > baseline_versions.txt             # List installed packages (sorted)
+cat /etc/redhat-release                            # OS version
+uname -r                                            # Kernel version
+yum repolist                                        # Active repos
+yum check-update                                    # Available updates
+
+rpm -Va > integrity_baseline.txt                    # Integrity check of all packages
+
+
+# ============================================================================
+# PART 2 — PRACTICE WITH 'yum update' (SAFE PATCHING)
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 2 — Apply safe enterprise patches using update
+# ---------------------------------------------------------------------------
+
+sudo yum update -y                                  # Apply all safe updates
+sudo yum update --security                          # Apply only security updates
+sudo yum update-minimal -y                          # Minimum required updates
+
+yum history                                         # Patch history
+yum history info <ID>                               # What changed in patch session
+
+rpm -qa --last | head                               # Most recently upgraded packages
+grep -i updated /var/log/yum.log                    # Confirm update actions
+
+# Advanced validation
+rpm -Va | grep '^..5'                               # Identify changed configuration files
+diff baseline_versions.txt <(rpm -qa --last)        # Compare before & after update
+
+
+# ============================================================================
+# PART 3 — PRACTICE WITH 'yum upgrade' (RISKY, DESTRUCTIVE)
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 3 — Simulate upgrade impact (Do NOT run on production)
+# ---------------------------------------------------------------------------
+
+# NOTE: On real servers, practice only in VM!
+
+sudo yum upgrade --assumeno                          # PREVIEW WHAT WILL BREAK
+sudo yum upgrade                                     # Run upgrade (removes old packages)
+
+yum history info <ID>                                # Check what was installed/removed
+rpm -qa --last | head                                # Show upgraded packages
+
+# Advanced dependency & removal checks
+yum check                                            # Detect broken deps
+repoquery --unsatisfied                              # Missing dependencies
+repoquery --duplicated                               # Duplicate packages
+rpm -Va --nofiles                                    # Validate install metadata
+
+
+# ============================================================================
+# PART 4 — DOWNGRADE / ROLLBACK PRACTICE
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 4 — Practice rolling back updates & upgrades
+# ---------------------------------------------------------------------------
+
+yum history                                           # View patch sessions
+sudo yum history undo <ID>                            # Undo a single package change
+sudo yum history rollback <ID>                        # Full rollback to specific state
+
+sudo yum downgrade -y bash                             # Downgrade specific packages
+sudo yum downgrade -y openssl                          # Downgrade openssl
+
+# Verify downgrade
+rpm -q bash                                            # Version check
+rpm -V bash                                            # Integrity check
+rpm -qa --last                                         # Verify installation time
+
+
+# ============================================================================
+# PART 5 — SAFETY VALIDATION LAB (MOST IMPORTANT)
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 5 — Create controlled test demonstrating update vs upgrade
+# ---------------------------------------------------------------------------
+
+# 1) Install older version of a package manually:
+yum list --showduplicates tree
+sudo yum install -y tree-1.7.0
+
+# 2) Run 'update'
+sudo yum update -y tree
+rpm -q tree                                            # Should upgrade to latest
+
+# 3) Reinstall old version again
+sudo rpm -Uvh --oldpackage tree-1.7.0.rpm
+
+# 4) Run 'upgrade'
+sudo yum upgrade -y
+rpm -q tree                                            # Upgraded + old libs removed
+
+
+# ============================================================================
+# PART 6 — BUILD A REPORT: UPDATE vs UPGRADE EFFECT
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# STEP 6 — Generate final comparison report
+# ---------------------------------------------------------------------------
+
+rpm -qa --last > final_versions.txt
+rpm -Va > integrity_after.txt
+
+echo "=== Diff Between Initial and Final System State ===" > comparison_report.txt
+echo " " >> comparison_report.txt
+
+diff baseline_versions.txt final_versions.txt >> comparison_report.txt
+
+echo "=== Integrity Differences ===" >> comparison_report.txt
+diff integrity_baseline.txt integrity_after.txt >> comparison_report.txt
+
+
+# ============================================================================
+# PART 7 — CLEANUP LAB
+# ============================================================================
+
+cd ..
+rm -rf update_vs_upgrade_lab
+
+# ===================================================================================================================================================
+
+EXERCISE 1.6
+
+===========================================================================================================================
+
+# ============================================================================
+# PROJECT NAME: SYSTEM UPDATES vs APPLICATION UPDATES IDENTIFICATION LAB
+# PURPOSE: To clearly differentiate system-level patching vs application patching
+# ============================================================================
+
+mkdir sys_vs_app_updates_lab
+cd sys_vs_app_updates_lab
+
+
+# ============================================================================
+# STEP 1 — CHECK ALL AVAILABLE UPDATES (MASTER VIEW)
+# ============================================================================
+
+yum check-update                                   # List all available updates
+yum list updates                                   # Same as above, detailed list
+
+# ADVANCED:
+yum check-update --security                        # Only security updates
+yum updateinfo list available                      # Advisories + severity
+
+
+# ============================================================================
+# STEP 2 — IDENTIFY SYSTEM PACKAGES (CORE OS UPDATES)
+# ============================================================================
+
+# System packages usually include:
+# kernel, systemd, openssl, glibc, bash, util-linux, coreutils, dracut, grub2
+
+yum check-update | grep -E 'kernel|systemd|openssl|glibc|bash|coreutils|grub2|dracut|util-linux'
+
+# ADVANCED:
+rpm -qa --last | grep -E 'kernel|systemd|glibc|openssl|bash'
+
+
+# ============================================================================
+# STEP 3 — IDENTIFY APPLICATION PACKAGES (USER INSTALLED APPS)
+# ============================================================================
+
+# Application packages usually include:
+# nginx, httpd, mysql, mariadb, java, docker, redis, python3, php, git
+
+yum check-update | grep -E 'nginx|httpd|mysql|mariadb|docker|redis|nodejs|python|php|git'
+
+# ADVANCED:
+rpm -qa --last | grep -vE 'kernel|systemd|glibc|openssl|util-linux|coreutils|dracut'
+
+
+# ============================================================================
+# STEP 4 — IDENTIFY UPDATE TYPE BY REPOSITORY SOURCE
+# ============================================================================
+
+yum info kernel                                     # Kernel → system update
+yum info glibc                                      # Core library → system update
+yum info nginx                                      # NGINX → application update
+yum info docker                                     # App-level update
+
+# ADVANCED (List repos):
+yum repolist all                                    # View active repos
+yum repoinfo                                        # Extensive repo details
+
+
+# ============================================================================
+# STEP 5 — IDENTIFY SECURITY UPDATES ONLY
+# ============================================================================
+
+yum updateinfo list security                        # All security patches
+yum updateinfo list cves                            # CVE specific info
+yum updateinfo info <ID>                            # Detailed security advisory
+
+# ADVANCED:
+yum update --security --assumeno                   # Preview only security updates
+
+
+# ============================================================================
+# STEP 6 — CLASSIFY THE UPDATES (GENERATE REPORT)
+# ============================================================================
+
+echo "==== SYSTEM UPDATES ====" > system_updates.txt
+yum check-update | grep -E 'kernel|systemd|openssl|glibc|bash|coreutils|dracut|util-linux' >> system_updates.txt
+
+echo "==== APPLICATION UPDATES ====" > application_updates.txt
+yum check-update | grep -vE 'kernel|systemd|openssl|glibc|bash|coreutils|dracut|util-linux' >> application_updates.txt
+
+
+# ============================================================================
+# STEP 7 — FILE-BASED IDENTIFICATION (ADVANCED L3 METHOD)
+# ============================================================================
+
+rpm -qf /usr/bin/bash                                # System package
+rpm -qf /usr/sbin/nginx                              # Application package
+rpm -qf /usr/bin/mysql                               # Application package
+
+# ADVANCED integrity checks:
+rpm -Va                                              # Validate installed system files
+rpm -Va | grep '^..5'                                # Modified config files
+
+
+# ============================================================================
+# STEP 8 — SEPARATE PACKAGES USING REGEX (EXPERT METHOD)
+# ============================================================================
+
+# System package filter
+rpm -qa --queryformat '%{NAME}\n' | grep -E 'kernel|systemd|glibc|openssl|bash|coreutils|dracut|grub2' \
+    > only_system_packages.txt
+
+# Application package filter
+rpm -qa --queryformat '%{NAME}\n' | grep -vE 'kernel|systemd|glibc|openssl|bash|coreutils|dracut|grub2' \
+    > only_application_packages.txt
+
+
+# ============================================================================
+# STEP 9 — PATCH ANALYSIS AFTER UPDATE (LIVE IMPACT CHECK)
+# ============================================================================
+
+yum update -y --assumeno                           # Preview patch without applying
+yum updateinfo list --installed                    # Show applied advisories
+
+yum history                                        # Patch events
+yum history info <ID>                              # Packages updated/removed
+
+# ADVANCED:
+grep -i updated /var/log/yum.log                   # Text-based verification
+rpm -qa --last | head                              # Recently modified packages
+
+
+# ============================================================================
+# STEP 10 — CLEANUP LAB
+# ============================================================================
+
+cd ..
+rm -rf sys_vs_app_updates_lab
+
+
+=============================================================================================================================================

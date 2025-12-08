@@ -1,0 +1,425 @@
+
+# Linux Logs & Error Management — Full End‑to‑End Project (RHEL / AlmaLinux / CentOS Stream 9)
+
+This is a **complete, production‑grade hands‑on project** designed to turn you into an expert in Linux logging using **RHEL‑based systems** (RHEL 8/9, CentOS Stream 9, AlmaLinux).
+
+Every task includes:
+
+* ✔ Full **VI-based file creation** (no HEREDOC)
+* ✔ All commands rewritten for **yum/dnf** only
+* ✔ **Line‑by‑line explanations**
+* ✔ Realistic application log locations
+* ✔ System logs, service logs, audit logs, troubleshooting
+
+---
+
+# 🚀 Project Overview
+
+You will create **3 applications** on your system:
+
+### 🔹 Application 1 — Stored in `/var/log/myapp1/`
+
+### 🔹 Application 2 — Stored in `/var/log/myapp2/`
+
+### 🔹 Application 3 — Stored in a custom folder `/opt/customlogs/`
+
+Each app will:
+
+* Write logs continuously
+* Generate errors
+* Be monitored using: `journalctl`, `tail`, `grep`, `awk`, `logrotate`, `systemctl`, SELinux audit logs, etc.
+
+**************************************************************************************************************
+
+# 📌 Task 0 — Install Required Packages
+
+Run:
+
+```bash
+sudo dnf install -y tree vim jq rsyslog
+```
+
+### Line‑by‑line explanation
+
+* `dnf install -y ...` → Installs tools without asking confirmation.
+* `tree` → Helps visualize directories.
+* `vim` → Editor used in this project.
+* `jq` → JSON log parsing.
+* `rsyslog` → Ensures syslog logging is enabled.
+
+***************************************************************************************************************
+
+# 📌 Task 1 — Create Application 1 (`myapp1`) Logging to `/var/log/myapp1/`
+
+## Step 1: Create the directory
+
+```bash
+sudo mkdir -p /var/log/myapp1
+```
+
+**Explanation:**
+
+* `mkdir -p` → Creates directory; no error if it already exists.
+* `/var/log/myapp1` → Custom application log directory.
+
+## Step 2: Create the application script
+
+```bash
+sudo vi /usr/local/bin/myapp1.sh
+```
+
+Paste inside (press `i` to insert):
+
+```bash
+
+#!/bin/bash
+while true; do
+  echo "INFO: MyApp1 is running at $(date)" >> /var/log/myapp1/myapp1.log
+  sleep 5
+
+done
+
+```
+
+Save: `ESC` → `:wq`
+
+### Explanation (line-by-line):
+
+* `#!/bin/bash` → Interpreter line.
+* `while true; do` → Infinite loop.
+* `echo ... >> file` → Appends log lines into log file.
+* `$(date)` → Current timestamp.
+* `sleep 5` → Runs every 5 seconds.
+
+## Step 3: Make script executable
+
+```bash
+sudo chmod +x /usr/local/bin/myapp1.sh
+```
+
+## Step 4: Create a systemd service for MyApp1
+
+```bash
+sudo vi /etc/systemd/system/myapp1.service
+```
+
+Paste:
+
+```ini
+[Unit]
+Description=MyApp1 Logging Application
+
+[Service]
+ExecStart=/usr/local/bin/myapp1.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save & exit.
+
+## Step 5: Start the service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now myapp1.service
+```
+
+### Step 6: Monitor logs
+
+```bash
+tail -f /var/log/myapp1/myapp1.log
+```
+
+*************************************************************************************************************
+
+
+
+
+
+
+
+*************************************************************************************************************
+# 📌 Task 2 — Create Application 2 (`myapp2`) Logging to `/var/log/myapp2/`
+
+Same method as Task 1, but this app produces **warnings + errors**.
+
+## Step 1: Create log folder
+
+```bash
+sudo mkdir -p /var/log/myapp2
+```
+
+## Step 2: Create the script
+
+```bash
+sudo vi /usr/local/bin/myapp2.sh
+```
+
+Paste:
+
+```bash
+#!/bin/bash
+count=0
+while true; do
+  echo "INFO: MyApp2 heartbeat $(date)" >> /var/log/myapp2/app.log
+
+  if (( count % 3 == 0 )); then
+    echo "WARNING: MyApp2 unusual event $(date)" >> /var/log/myapp2/app.log
+  fi
+
+  if (( count % 5 == 0 )); then
+    echo "ERROR: MyApp2 failure event $(date)" >> /var/log/myapp2/error.log
+  fi
+
+  count=$((count+1))
+  sleep 4
+done
+```
+
+### Line-by-line explanation
+
+* `count=0` → Counter used for generating periodic errors.
+* `% 3 == 0` → Every 3 cycles produce a warning.
+* `% 5 == 0` → Every 5 cycles produce an error.
+* Logs are separated: `app.log` and `error.log`.
+
+## Step 3: Enable service
+
+Same as before.
+
+***********************************************************************************************************
+
+
+
+
+
+
+
+************************************************************************************************************
+# 📌 Task 3 — Application 3 logs into `/opt/customlogs/`
+
+## Step 1: Create folder
+
+```bash
+sudo mkdir -p /opt/customlogs
+```
+
+## Step 2: Script
+
+```bash
+sudo vi /usr/local/bin/myapp3.sh
+```
+
+Paste:
+
+```bash
+#!/bin/bash
+while true; do
+  echo "{\"level\":\"info\", \"msg\":\"App3 event\", \"ts\":\"$(date)\"}" >> /opt/customlogs/json.log
+  sleep 3
+done
+```
+
+### Explanation
+
+* Writes JSON logs → useful for jq parsing.
+
+*************************************************************************************************************
+
+
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 4 — Understand `/var/log` Structure (RHEL)
+
+Run:
+
+```bash
+tree -L 1 /var/log
+```
+
+### Important folders
+
+| Log File                   | Purpose                       |
+| -------------------------- | ----------------------------- |
+| `/var/log/messages`        | General syslog logs           |
+| `/var/log/secure`          | Authentication / sudo logs    |
+| `/var/log/audit/audit.log` | SELinux + security audit logs |
+| `/var/log/cron`            | Cron job logs                 |
+| `/var/log/httpd/`          | Apache logs                   |
+| `/var/log/dnf.log`         | Package installation logs     |
+
+
+**************************************************************************************************************
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 5 — Journalctl Mastery (systemd logs)
+
+### View all logs
+
+```bash
+journalctl
+```
+
+### Most recent logs
+
+```bash
+journalctl -xe
+```
+
+Explanation:
+
+* `-x` → Adds explanation.
+* `-e` → Jump to end.
+
+### Logs for a specific service
+
+```bash
+journalctl -u myapp1.service -f
+```
+
+
+**************************************************************************************************************
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 6 — SELinux Log Analysis
+
+Check SELinux denials:
+
+```bash
+sudo grep AVC /var/log/audit/audit.log
+```
+
+List detailed events:
+
+```bash
+sudo ausearch -m avc
+```
+
+
+**************************************************************************************************************
+
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 7 — Grep, Awk, Sed Log Processing
+
+### Find errors
+
+```bash
+grep -i error /var/log/myapp2/error.log
+```
+
+### Extract timestamps
+
+```bash
+awk '{print $NF}' /var/log/myapp1/myapp1.log
+```
+
+### Replace text
+
+```bash
+sed 's/INFO/DEBUG/g' /var/log/myapp1/myapp1.log
+```
+
+
+**************************************************************************************************************
+
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 8 — Setup Log Rotation
+
+Create rule:
+
+```bash
+sudo vi /etc/logrotate.d/myapps
+```
+
+Paste:
+
+```conf
+/var/log/myapp1/*.log {
+  daily
+  rotate 7
+  compress
+  missingok
+}
+
+/var/log/myapp2/*.log {
+  size 5M
+  rotate 5
+  compress
+}
+```
+
+
+**************************************************************************************************************
+
+
+
+
+
+
+**************************************************************************************************************
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 9 — Error Simulation & Troubleshooting
+
+Stop service:
+
+```bash
+sudo systemctl stop myapp1
+```
+
+Check reason:
+
+```bash
+sudo systemctl status myapp1
+journalctl -u myapp1 -xe
+```
+
+
+**************************************************************************************************************
+
+
+
+
+
+
+**************************************************************************************************************
+
+# 📌 Task 10 — Final Exercises
+
+✔ Create a new app writing logs in `/srv/logs/`
+✔ Add log rotation
+✔ Parse logs using awk
+✔ Fix a deliberate SELinux denial
+
+---
+
+# END OF REWRITE — RHEL, AlmaLinux, CentOS Stream 9 Optimized
+
+**************************************************************************************************************

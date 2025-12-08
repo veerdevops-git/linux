@@ -1,0 +1,44 @@
+
+
+
+
+
+=======================================================================================================================================
+
+EXERCISE 1.2
+
+Q. Process management
+==================================================================================================================================
+
+ps -e                      ***** List all running processes (system + user) *****
+ps -ef                     ***** Full-format listing of all processes *****
+ps aux                     ***** Show all processes with CPU/Memory usage *****
+
+ps -ef | grep myapp1       ***** Search for a specific process by name *****
+ps aux | grep myapp1       ***** Find a process with CPU/mem details *****
+pgrep myapp1               ***** Get PIDs of matching processes *****
+pgrep -a myapp1            ***** Get PIDs + full command line *****
+
+ps -p <pid>                ***** Check if a PID is active *****
+
+
+ps -eo pid,comm,args | grep <name>                ***** Show full command path used to start process *****
+ls -l /proc/<pid>/exe                             ***** Identify exact binary executable path *****
+
+
+
+ps -eo pid,user,comm | grep -E 'root|systemd'     ***** System-level processes usually run as root/system users *****
+
+
+ps -u <username>                                  ***** Show all processes started by specific user *****
+ps -eo pid,user,args | grep <user>                ***** Identify user-owned application processes *****
+
+ps -p <pid> -f                                    ***** Full details of a process by PID *****
+ps -p <pid> -o pid,ppid,user,etime,args           ***** Custom detailed info about a process *****
+
+ps -ef --forest                                   ***** Display hierarchical tree format of processes *****
+ps axjf                                           ***** Show process tree + job control info *****
+
+
+ps aux --sort=-%cpu                               ***** Sort by highest CPU usage *****
+ps aux --sort=-%mem                               ***** Sort by highest memory usage *****

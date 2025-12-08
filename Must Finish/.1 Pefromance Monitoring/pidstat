@@ -1,0 +1,13 @@
+pidstat
+
+
+pidstat -u 1 5
+
+bob@centos-host ~ ➜  pidstat -u 1 5
+Linux 5.15.0-1083-gcp (centos-host)     11/17/25        _x86_64_        (16 CPU)
+
+17:34:01      UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command
+17:34:02        0     19545   19.00    0.00    0.00   81.00   19.00     5  stress-ng-cpu
+17:34:02        0     19546   19.00    0.00    0.00   80.00   19.00     8  stress-ng-cpu
+17:34:02        0     19547   20.00    0.00    0.00   80.00   20.00     6  stress-ng-cpu
+17:34:02        0     19548   20.00    0.00    0.00   79.00   20.00    14  stress-ng-cpu

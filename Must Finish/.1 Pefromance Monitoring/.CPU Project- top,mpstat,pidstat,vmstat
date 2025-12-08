@@ -1,0 +1,23 @@
+Performance 
+
+EXERCISE 1.1
+
+CPU Usage and Performance
+==================================================================================================================================
+
+📦 Install below Application for CPU Testing
+Below applications will be used to generate real CPU load:
+1. Install stress-ng (CPU Load Tool)
+
+sudo yum install epel-release -y
+sudo yum install stress-ng -y
+
+Set the stress on CPU and make it run bg process
+
+stress --cpu 4 &
+________________________________________
+	
+ 
+
+
+

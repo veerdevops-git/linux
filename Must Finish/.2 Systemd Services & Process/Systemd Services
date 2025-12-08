@@ -1,0 +1,30 @@
+
+EXERCISE 1.1
+
+Q listing service
+==================================================================================================================================
+
+systemctl list-units --type=service --state=running           ***** List all currently running services *****
+systemctl list-units --type=service                           ***** List all loaded/active/inactive services *****
+systemctl --failed                                            ***** Show failed services *****
+
+
+systemctl | grep myapp1                                       ***** Search for a service by name in all units *****
+systemctl list-unit-files | grep myapp1                       ***** Find installed service files (enabled/disabled) *****
+systemctl status myapp1                                       ***** Get complete details of a specific service *****
+
+
+systemctl is-active myapp1      		                      ***** Check only active/inactive state *****
+systemctl status myapp1			                              ***** Verify running status with logs *****
+
+systemctl cat myapp1		                                  ***** Display service file content & location *****
+
+
+systemctl status nginx                    					  ***** Check nginx service status *****
+systemctl is-active nginx                 					  ***** Check if nginx is running *****
+rpm -qf /usr/lib/systemd/system/nginx.service                 ***** Find the package that installed nginx service *****
+
+
+
+
+

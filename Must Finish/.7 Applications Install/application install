@@ -1,0 +1,9 @@
+
+
+EXERCISE 1.1
+===========================================================================================================================
+if you run this 3 commonds to find installed application path you will find
+
+which nginx
+whereis nginx
+rpm -ql nginx | head -n 20

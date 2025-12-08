@@ -1,0 +1,136 @@
+
+📂 Default Linux Log Directory
+
+/var/log     *** Stores system, application, security, kernel & service logs ***
+
+📍 Common Log File Paths
+/var/log/messages          *** General system logs ***
+/var/log/secure            *** Authentication & security logs ***
+/var/log/cron              *** Cron job logs ***
+/var/log/dnf.log           *** Package installation logs ***
+/var/log/boot.log          *** System boot logs ***
+/var/log/dmesg             *** Kernel hardware detection logs ***
+/var/log/audit/audit.log   *** SELinux & audit logs ***
+/var/log/<appname>/        *** Custom application logs ***
+
+📄 Basic Log Viewing Commands
+cat file.log                  *** Print entire log ***
+less file.log                 *** Scrollable log viewer ***
+head -n 50 file.log           *** Show first 50 lines ***
+tail file.log                 *** Show last 10 lines ***
+tail -n 100 file.log          *** Show last 100 lines ***
+
+
+🔍 Searching Logs
+grep "ERROR" file.log                     *** Search for keyword ***
+grep -i failed /var/log/secure            *** Case-insensitive search ***
+grep -r "timeout" /var/log                *** Recursive directory search ***
+grep -E "ERROR|WARN" app.log              *** Regex multi-match ***
+grep -v INFO app.log                      *** Exclude matching lines ***
+
+
+📡 Real-Time Log Monitoring
+tail -f file.log                          *** Live log streaming ***
+tail -Fn50 file.log                       *** Follow after rotation ***
+watch -n 2 tail file.log                  *** Refresh logs every 2 sec ***
+
+
+🧩 Journalctl (systemd logging)
+journalctl                                *** Show all journal logs ***
+journalctl -u sshd                        *** Logs for specific service ***
+journalctl -u nginx -f                    *** Live follow service logs ***
+journalctl --since "10 min ago"           *** Time-based filtering ***
+journalctl -xe                            *** Show recent system errors ***
+journalctl -k                             *** Kernel journal messages ***
+
+
+🖥 Kernel, Boot & Hardware Logs
+dmesg                                     *** Kernel ring buffer logs ***
+dmesg -T | grep usb                       *** Hardware event timestamping ***
+journalctl -b                             *** Current boot logs ***
+journalctl -b -1                          *** Previous boot logs ***
+
+
+🔐 SELinux & Audit Logs
+grep AVC /var/log/audit/audit.log         *** Check SELinux denials ***
+ausearch -m AVC                           *** Query audit DB for violations ***
+aureport -a                               *** Summarize access violations ***
+sealert -a /var/log/audit/audit.log       *** Human-readable SELinux report ***
+tail -f /var/log/audit/audit.log          *** Live audit event monitoring ***
+
+
+🧑‍💻 Authentication & Login History
+last                                      *** Successful logins ***
+lastb                                     *** Failed login attempts ***
+last -a                                   *** Include source IP ***
+faillog -u root                           *** Failed login count for user ***
+
+
+🧰 Rsyslog Management
+systemctl status rsyslog                  *** Check rsyslog health ***
+systemctl restart rsyslog                 *** Restart logging service ***
+systemctl enable rsyslog                  *** Start at boot ***
+logger "test message"                     *** Send test syslog entry ***
+grep -i error /etc/rsyslog.conf           *** Check config issues ***
+
+
+🧠 Crash, OOM & Core Dumps
+journalctl -xe | grep -i killed           *** Detect OOM kills ***
+dmesg | grep -i oom                       *** Kernel Out-Of-Memory logs ***
+coredumpctl list                          *** List core dumps ***
+coredumpctl info <PID>                    *** View crash metadata ***
+
+
+🔥 Networking & Firewall Logs
+journalctl -u firewalld                   *** Firewall activity ***
+grep "DENIED" /var/log/firewalld          *** Blocked connections ***
+tcpdump -nn -i eth0                       *** Live packet capture ***
+
+
+🗜 Compressed Log Access
+zcat file.log.gz                          *** View compressed logs ***
+zgrep ERROR file.log.gz                   *** Search compressed logs ***
+zless file.log.gz                         *** Scroll compressed logs ***
+
+
+💾 Log Size, Disk & Rotation
+du -sh /var/log            	               *** Total log size ***
+du -sh /var/log/*                         *** Per-file size ***
+df -h                                     *** Disk usage ***
+logrotate -d /etc/logrotate.conf          *** Debug rotation ***
+logrotate -f /etc/logrotate.conf          *** Force rotate ***
+
+🧹 Journal Storage Maintenance
+journalctl --disk-usage                   *** Show journal size ***
+journalctl --vacuum-size=500M             *** Shrink journal ***
+journalctl --vacuum-time=10d              *** Delete logs older than 10 days ***
+journalctl --list-boots                   *** Boot history ***
+
+🕵️ Advanced Log Filtering
+grep -Ril "panic" /var/log                *** Find critical failures ***
+awk '/ERROR/ {print $0}' app.log          *** Extract error lines ***
+sort app.log | uniq -c | sort -nr         *** Count repeated log entries ***
+grep -A3 -B2 "ERROR" file.log             *** Show context lines ***
+
+
+📢 Real-Time Production Monitoring Combo
+tail -f /var/log/messages | grep -Ei "error|fail|critical|panic"
+*** Live alerting without monitoring tools ***
+
+
+✅ Standard Troubleshooting Workflow
+systemctl status <service>
+journalctl -u <service> -xe
+grep -i error /var/log/messages
+tail -f /var/log/<app>/<app>.log
+grep AVC /var/log/audit/audit.log
+df -h
+du -sh /var/log/*
+
+
+
+
+
+
+
+

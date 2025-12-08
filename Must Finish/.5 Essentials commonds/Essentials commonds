@@ -1,0 +1,371 @@
+
+EXERCISE 1.1
+
+==================================================================================================================================
+
+🔹 1. File & Directory Navigation (Basic)
+
+pwd							#%Show current directory path
+ls							#List directory contents
+ls -l						#Long listing with details
+ls -a						#List including hidden files
+ls -lh						#Human-readable sizes
+ls -R						#Recursive listing
+cd dir						#Change directory
+cd ..						#Go up one directory
+cd /path					#Go to absolute path
+cd ~						#Go to home directory
+cd -						#Go to previous director
+
+===================================================================================================================================
+
+EXERCISE 1.2
+
+===================================================================================================================================
+
+
+# ======================================================================
+# PROJECT: Complete File & Directory Management (Basic + Advanced)
+# ======================================================================
+
+# ------------------------------------------------------------
+# STEP 1 — Create project workspace
+# ------------------------------------------------------------
+
+mkdir file_mgmt_project             # Create main project folder
+cd file_mgmt_project                # Enter project directory
+
+
+# ------------------------------------------------------------
+# STEP 2 — Basic File Creation (touch)
+# ------------------------------------------------------------
+
+touch file1.txt                     # Create empty file
+touch file2.log                     # Create log file
+touch config.yaml                   # Create config file
+
+mkdir files                         # Create directory 'files'
+touch files/a.txt                   # Create file inside folder
+touch files/b.txt                   # Create another file
+touch files/c.txt                   # Create third file
+
+ls -l                               # List files
+ls -l files/                        # List files inside folder
+
+
+# ------------------------------------------------------------
+# STEP 3 — Basic Directory Creation (mkdir)
+# ------------------------------------------------------------
+
+mkdir dir1                          # Create simple directory
+mkdir dir2                          # Create second directory
+mkdir documents                     # Create documents folder
+
+mkdir images reports backups        # Create multiple directories at once
+ls -d */                            # Verify directories
+
+
+# ------------------------------------------------------------
+# STEP 4 — Nested Directory Creation (mkdir -p)
+# ------------------------------------------------------------
+
+mkdir -p projects/projectA/src      # Create nested src folder
+mkdir -p projects/projectA/logs     # Create logs folder
+mkdir -p projects/projectA/bin      # Create bin folder
+
+mkdir -p department/IT/network/security       # Deep nested structure
+
+ls -R projects                      # Verify directory tree
+ls -R department                    # Verify nested structure
+
+
+# ------------------------------------------------------------
+# STEP 5 — Basic File Deletion (rm)
+# ------------------------------------------------------------
+
+rm file1.txt                        # Remove file
+rm files/a.txt files/b.txt          # Remove multiple files
+ls files/                           # Verify remaining files
+
+
+# ------------------------------------------------------------
+# STEP 6 — rm -i (Confirm Before Delete)
+# ------------------------------------------------------------
+
+rm -i file2.log                     # Confirm deletion (y/n)
+
+
+# ------------------------------------------------------------
+# STEP 7 — rm -f (Force Delete)
+# ------------------------------------------------------------
+
+touch readonly.txt                  # Create file
+chmod 444 readonly.txt              # Make read-only
+rm -f readonly.txt                  # Force delete without prompt
+
+
+# ------------------------------------------------------------
+# STEP 8 — rmdir (Remove Empty Directory)
+# ------------------------------------------------------------
+
+mkdir empty_dir                     # Create empty directory
+rmdir empty_dir                     # Remove empty directory
+rmdir files                         # FAIL: directory not empty
+
+
+# ------------------------------------------------------------
+# STEP 9 — rm -r (Recursive Delete)
+# ------------------------------------------------------------
+
+rm -r projects/projectA             # Delete entire project folder
+rm -r department                    # Delete entire department tree
+
+
+# ======================================================================
+# ========================= ADVANCED COMMANDS ==========================
+# ======================================================================
+
+
+# ------------------------------------------------------------
+# STEP 10 — Advanced Linking (Hard & Soft Links)
+# ------------------------------------------------------------
+
+touch masterfile.txt                # Create main file
+ln masterfile.txt master_hard       # Create hard link
+ln -s masterfile.txt master_soft    # Create symbolic link (shortcut)
+
+ls -li                              # Show inodes for link comparison
+
+
+# ------------------------------------------------------------
+# STEP 11 — Advanced Copy Operations
+# ------------------------------------------------------------
+
+cp -a config.yaml config_backup.yaml        # Copy preserving attributes
+cp -v file3.txt file3_copy.txt              # Verbose copy
+cp --preserve=all config.yaml config_full   # Preserve ALL metadata
+
+
+# ------------------------------------------------------------
+# STEP 12 — Delete Based on Conditions (find)
+# ------------------------------------------------------------
+
+mkdir logs                              # Create log directory
+touch logs/app1.log logs/app2.log
+touch logs/error1.log logs/error2.log
+
+find logs -name "*.log" -delete         # Delete all .log files
+find . -type f -delete                  # Delete all files (use carefully)
+find . -mtime +30 -delete               # Delete files older than 30 days
+
+
+# ------------------------------------------------------------
+# STEP 13 — Directory Size & Stats (du, wc)
+# ------------------------------------------------------------
+
+du -sh *                                # Size of each file/folder
+du -sh .                                # Total directory size
+find . -type f | wc -l                  # Count files
+find . -type d | wc -l                  # Count directories
+
+
+# ------------------------------------------------------------
+# STEP 14 — Safe File Operations
+# ------------------------------------------------------------
+
+rm -I                                    # Ask once before deleting many files
+touch secret.txt
+shred -u secret.txt                      # Securely delete (cannot recover)
+mv -n config.yaml config.yaml.bak        # Move without overwriting
+cp -n config_backup.yaml config.yaml     # Copy without overwriting
+
+
+# ------------------------------------------------------------
+# STEP 15 — rsync (Professional Sync Tool)
+# ------------------------------------------------------------
+
+mkdir source_dir                           # Create source folder
+touch source_dir/app.py source_dir/readme.md
+
+mkdir dest_dir                             # Create destination folder
+
+rsync -av source_dir/ dest_dir/            # Sync with attributes
+rsync -av --delete source_dir/ dest_dir/   # Mirror destination
+rsync -av --progress source_dir dest_dir   # Sync with progress bar
+
+
+# ------------------------------------------------------------
+# STEP 16 — Metadata & Inode Inspection
+# ------------------------------------------------------------
+
+stat config.yaml                           # Full metadata
+ls -li                                      # Inode numbers
+df -i                                       # Inode usage for filesystem
+
+
+# ------------------------------------------------------------
+# STEP 17 — Auto-Delete Empty Directories
+# ------------------------------------------------------------
+
+mkdir -p test_structure/empty1
+mkdir -p test_structure/empty2/subempty
+
+find test_structure -type d -empty -delete   # Delete empty directories
+
+
+# ======================================================================
+# STEP 18 — ADVANCED MINI PROJECT (Final Challenge)
+# ======================================================================
+
+# Create company directory tree
+mkdir -p company/HR/payroll
+mkdir -p company/HR/records
+mkdir -p company/Engineering/dev/src
+mkdir -p company/Engineering/dev/tests
+mkdir -p company/Engineering/qa/reports
+
+# Create files
+touch company/HR/payroll/salary.xlsx
+touch company/Engineering/dev/src/app.py
+touch company/Engineering/dev/tests/t
+
+
+
+===================================================================================================================================
+
+EXERCISE 1.3
+
+===================================================================================================================================
+
+🔹 3. Copy, Move, Rename
+
+cp file dest				#Copy file
+cp -i file dest				#Copy with confirmation
+cp -r dir dest				#Copy directory
+mv file dest				#Move file
+mv old new					#Rename file
+mv -i old new				#Prompt before overwrite
+
+
+===================================================================================================================================
+
+EXERCISE 1.4
+
+===================================================================================================================================
+
+🔹 4. Viewing & Reading File Content
+
+cat file					#Display entire file
+tac file					#Display file in reverse
+nl file						#Show numbered lines
+less file					#Scroll file (best for logs)
+more file					#View file page by page
+head file					#Show first 10 lines
+head -n 20 file				#Show first 20 lines
+tail file					#Show last 10 lines
+tail -n 50 file				#Last 50 lines
+tail -f logfile				#Follow file updates
+
+===================================================================================================================================
+
+
+EXERCISE 1.5
+
+===================================================================================================================================
+
+🔹 5. Search Files & Directories
+
+find /path -name file		#Find by filename
+find . -name "*.log"		#Find by pattern
+find . -type f				#Find files only
+find . -type d				#Find directories only
+find . -empty				#Find empty files/directories
+find . -size +10M			#Find files larger than 10MB
+find . -mtime -1			#Modified in last 24 hours
+locate file					#Fast search (uses database)
+updatedb					#Update locate database
+
+===================================================================================================================================
+
+EXERCISE 1.6
+
+===================================================================================================================================
+
+🔹 6. Search Inside Files (Content Search)
+
+grep "text" file			#Search for text
+grep -i "text" file			#Case-insensitive search
+grep -r "text" .			#Recursively search in all files
+grep -n "text" file			#Show line numbers
+grep -v "text" file			#Show lines NOT matching
+grep -E "pattern"			#Extended regex search
+grep -w word file			#Match whole word
+
+
+===================================================================================================================================
+
+EXERCISE 1.7
+
+===================================================================================================================================
+
+🔹 7. File Size & Disk Usage
+
+du -sh dir					#Directory size summary
+du -sh *					#All file/folder sizes
+du -m dir					#Size in MB
+du -k dir					#Size in KB
+du -ah dir					#All files + sizes
+df -h						#Disk usage of filesystem
+ls -lh file					#File size in human format
+stat file					#Detailed size, timestamps
+wc -l file					#Count lines
+wc -w file					#Count words
+wc -c file					#Size in bytes
+
+
+===================================================================================================================================
+
+
+EXERCISE 1.8
+
+===================================================================================================================================
+
+🔹 8. Sorting, Filtering, Text Utilities
+
+sort file					#Sort lines alphabetically
+sort -n file				#Numeric sort
+uniq file					#Remove duplicate lines
+uniq -c file				#Count duplicates
+cut -d ":" -f1 file			#Cut columns by delimiter
+tr a-z A-Z					#Transform text
+sed 's/a/b/' file			#Replace text
+awk '{print $1}' file		#Print column 1
+
+
+===================================================================================================================================
+
+
+EXERCISE 1.1
+
+===================================================================================================================================
+
+
+EXERCISE 1.1
+
+===================================================================================================================================
+
+
+EXERCISE 1.1
+
+===================================================================================================================================
+
+
+EXERCISE 1.1
+
+===================================================================================================================================
+
+
+EXERCISE 1.1
+
+===================================================================================================================================
+

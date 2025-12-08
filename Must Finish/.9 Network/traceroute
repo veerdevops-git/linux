@@ -1,0 +1,4 @@
+traceroute google.com   ## traceroute destination ip/name
+
+traceroute -n redhat.com	## traceroute destination will show only ip
+
