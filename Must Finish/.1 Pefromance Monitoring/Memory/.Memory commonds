@@ -1,0 +1,85 @@
+
+🧠 Memory & RAM Commands
+
+free -h                         # Show total, used, free RAM and swap in human-readable format
+free -m                         # Display memory usage in MB
+free -g                         # Display memory usage in GB
+cat /proc/meminfo               # Detailed kernel memory statistics
+vmstat                          # Show memory, swap, CPU, and I/O statistics
+vmstat 5                        # Refresh memory stats every 5 seconds
+top                             # Real-time process memory usage
+htop                            # Enhanced interactive memory and process viewer
+ps aux --sort=-%mem             # List processes sorted by memory usage
+ps -eo pid,comm,%mem,%cpu       # Show memory and CPU usage per process
+watch free -h                   # Continuously monitor memory usage
+
+====================================================================================================
+
+🔄 Swap Memory Commands
+
+
+swapon --show                   # Show active swap devices/files
+cat /proc/swaps                 # List swap usage details
+free -h | grep Swap             # Quick swap usage summary
+vmstat | grep si                # Show swap-in activity
+vmstat | grep so                # Show swap-out activity
+cat /proc/sys/vm/swappiness     # Check system swappiness value
+
+
+======================================================================================================
+
+🔍 Per-Process Memory & Swap Usage
+
+smem                            # Show per-process memory and swap usage (best tool)
+smem -s swap -r                 # Sort processes by swap usage
+pmap <PID>                      # Show memory map of a process
+pmap -x <PID>                   # Detailed memory usage of a process
+grep VmRSS /proc/<PID>/status   # Show resident memory of a process
+grep VmSwap /proc/<PID>/status  # Show swap used by a specific process
+
+================================================================================================
+
+📊 System Memory Pressure & Health
+
+uptime                          # Show load average (memory pressure indicator)
+dmesg | grep -i oom             # Check for Out-Of-Memory killer events
+slabtop                         # Kernel slab memory usage
+sar -r                          # Historical memory usage (sysstat)
+sar -S                          # Historical swap usage
+
+
+
+
+=================================================================================================
+
+⚙️ Kernel & Memory Tuning
+
+sysctl -a | grep vm             # Show all VM-related kernel parameters
+sysctl vm.swappiness            # Check swappiness setting
+sysctl vm.overcommit_memory     # Check memory overcommit policy
+sysctl vm.overcommit_ratio      # Check overcommit ratio
+
+=================================================================================================
+
+📁 Memory-Related Files & Paths
+
+/proc/meminfo                   # Main memory statistics file
+/proc/swaps                     # Swap device/file information
+/proc/<PID>/status              # Per-process memory & swap info
+/proc/sys/vm/                   # Kernel memory tunables
+/etc/sysctl.conf                # Persistent memory tuning config
+/etc/fstab                      # Swap mount configuration
+
+
+==================================================================================================
+
+✅ Most Used in Production (CentOS / AlmaLinux)
+
+free -h
+top
+vmstat
+smem
+ps aux --sort=-%mem
+cat /proc/meminfo
+
+
