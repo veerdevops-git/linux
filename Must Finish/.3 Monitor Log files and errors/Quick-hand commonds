@@ -40,6 +40,11 @@ journalctl                                *** Show all journal logs ***
 journalctl -u sshd                        *** Logs for specific service ***
 journalctl -u nginx -f                    *** Live follow service logs ***
 journalctl --since "10 min ago"           *** Time-based filtering ***
+journalctl -u NetworkManager --since "today"
+journalctl -k							**** Kernel-level link drops are logged here***
+grep -i network /var/log/messages
+journalctl -u NetworkManager --since "2025-12-14 00:00:00" --until "2025-12-14 23:59:59"
+journalctl -u NetworkManager --since "Dec 14"
 journalctl -xe                            *** Show recent system errors ***
 journalctl -k                             *** Kernel journal messages ***
 
