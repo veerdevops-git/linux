@@ -15,7 +15,11 @@ ps -ef                     ***** Full-format listing of all processes *****
 ps aux                     ***** Show all processes with CPU/Memory usage *****
 
 ps -ef | grep myapp1       ***** Search for a specific process by name *****
+ps -ef | grep 'myap.*'     ***** Matches myap followed by anything *****
 ps aux | grep myapp1       ***** Find a process with CPU/mem details *****
+ps aux | grep -i myapp1 | grep -v grep       *****Removes the grep process from output *****
+
+
 pgrep myapp1               ***** Get PIDs of matching processes *****
 pgrep -a myapp1            ***** Get PIDs + full command line *****
 
